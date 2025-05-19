@@ -140,7 +140,7 @@ def desbloquear_usuario(data: DesbloquearUsuarioRequest):
     unlock_url = "https://proyecto.melabs.tech:8443/RestAPI/UnlockUser"
     payload = {
         "AuthToken": "d894b0a9-7c9a-4c89-85e6-4cc97fa695ed",  # ✅ Token correcto
-        "PRODUCT_NAME": "https://ad360.melabs.tech",
+        "PRODUCT_NAME": "https://ad360.melabs.tech/admp/RestAPI/SearchUser",
         "domainName": " Produccion.com",
         "inputFormat": json.dumps([{"sAMAccountName": usuario}])
     }
