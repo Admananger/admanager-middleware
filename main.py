@@ -137,10 +137,10 @@ def desbloquear_usuario(data: DesbloquearUsuarioRequest):
             "messages": [{"type": "to_user", "content": "🔒 No verificado. Inicia sesión primero."}]
         }, status_code=403)
 
-    unlock_url = "https://proyecto.melabs.tech:8443/RestAPI/UnlockUser"
+    unlock_url = "https://ad360.melabs.tech/admp/RestAPI/UnlockUser"
     payload = {
         "AuthToken": "d894b0a9-7c9a-4c89-85e6-4cc97fa695ed",  # ✅ Token correcto
-        "PRODUCT_NAME": "https://ad360.melabs.tech/admp/RestAPI/SearchUser",
+        "PRODUCT_NAME": "https://ad360.melabs.tech/admp",
         "domainName": " Produccion.com",
         "inputFormat": json.dumps([{"sAMAccountName": usuario}])
     }
