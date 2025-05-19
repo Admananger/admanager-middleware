@@ -141,7 +141,7 @@ def desbloquear_usuario(data: DesbloquearUsuarioRequest):
     payload = {
         "AuthToken": "d894b0a9-7c9a-4c89-85e6-4cc97fa695ed",  # ✅ Token correcto
         "PRODUCT_NAME": "proyecto.melabs.tech:8443",
-        "domainName": "cybersex.com",
+        "domainName": " Produccion.com",
         "inputFormat": json.dumps([{"sAMAccountName": usuario}])
     }
 
