@@ -8,7 +8,7 @@ services:
     startCommand: uvicorn main:app --host 0.0.0.0 --port 10000
     envVars:
       - key: ADMANAGER_URL
-        value: https://proyecto.melabs.tech:8443/RestAPI/SearchUser
+        value: https://ad360.melabs.tech/RestAPI/SearchUser
       - key: ADMANAGER_TOKEN
         value: 0638b6f2-404d-450a-b56f-4deb8bc36b28
       - key: ADMANAGER_DOMAIN
