@@ -141,7 +141,7 @@ def desbloquear_usuario(data: DesbloquearUsuarioRequest):
     payload = {
         "AuthToken": "0638b6f2-404d-450a-b56f-4deb8bc36b28",  # ✅ Token correcto
         "PRODUCT_NAME": "ad360.melabs.tech/admp",
-        "domainName": " Produccion.com",
+        "domainName": "produccion.com",
         "inputFormat": json.dumps([{"sAMAccountName": usuario}])
     }
 
