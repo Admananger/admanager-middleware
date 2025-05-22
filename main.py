@@ -279,3 +279,45 @@ def cambiar_password(data: CambioPasswordRequest):
             "messages": [{"type": "to_user", "content": f"⚠️ Error del servidor: {str(e)}"}],
             "status": "error"
         }, status_code=500)
+        @app.post("/modificar-usuario")
+def modificar_usuario(data: ModificarUsuarioPlantillaRequest):
+    # Aquí ya no se verifica OTP ni validación previa del usuario
+
+    modify_url = ADMANAGER_URL.replace("/SearchUser", "/ModifyUser")
+
+    payload = {
+        "AuthToken": AUTH_TOKEN,
+        "PRODUCT_NAME": "ADManager Plus",
+        "domainName": DOMAIN_NAME,
+        "match_ldap_name": "sAMAccountName",
+        "inputFormat": json.dumps([{
+            "sAMAccountName": data.sAMAccountName,
+            "description": data.description,
+            "templateName": "cambioContraseñaWP"
+        }])
+    }
+
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+
+    try:
+        response = requests.post(modify_url, data=payload, headers=headers, timeout=10)
+        result = response.json()
+
+        if isinstance(result, list) and result[0].get("status") == "1":
+            return JSONResponse(content={
+                "messages": [{"type": "to_user", "content": f"✅ Usuario {data.sAMAccountName} modificado exitosamente con la plantilla."}],
+                "status": "ok"
+            })
+
+        mensaje_error = result[0].get("statusMessage", "").lower()
+        return JSONResponse(content={
+            "messages": [{"type": "to_user", "content": f"❌ Error al modificar usuario: {mensaje_error}"}],
+            "status": "error"
+        })
+
+    except Exception as e:
+        return JSONResponse(status_code=500, content={
+            "messages": [{"type": "to_user", "content": f"⚠️ Error del servidor: {str(e)}"}]
+        })
