@@ -63,7 +63,7 @@ def validar_password(password: str) -> bool:
         return False
     if not re.search(r"[0-9]", password):
         return False
-    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+    if not re.search(r"[!@#$%^&*-_(),.?\":{}|<>]", password):
         return False
     return True
 
