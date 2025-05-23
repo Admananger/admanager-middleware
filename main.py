@@ -279,7 +279,8 @@ def cambiar_password(data: CambioPasswordRequest):
             "messages": [{"type": "to_user", "content": f"⚠️ Error del servidor: {str(e)}"}],
             "status": "error"
         }, status_code=500)
-        @app.post("/modificar-usuario")
+
+@app.post("/modificar-usuario")
 def modificar_usuario(data: ModificarUsuarioPlantillaRequest):
     # Aquí ya no se verifica OTP ni validación previa del usuario
 
