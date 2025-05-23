@@ -279,7 +279,7 @@ def cambiar_password(data: CambioPasswordRequest):
             return JSONResponse(content={
                 "messages": [
                     {"type": "to_user", "content": f"✅ Contraseña actualizada correctamente para el usuario {usuario}."},
-                    {"type": "to_user", "content": "🔐 Por seguridad, deberás cambiarla nuevamente al iniciar sesión."}
+                    {"type": "to_user", "content": "🔐 Por seguridad, va a cambiar nuevamente al iniciar sesión."}
                 ],
                 "status": "ok"
             })
