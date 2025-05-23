@@ -35,6 +35,10 @@ class VerificarOTP(BaseModel):
     
 class DesbloquearUsuarioRequest(BaseModel):
     usuario: str
+class ModificarUsuarioPlantillaRequest(BaseModel):
+    sAMAccountName: str
+    templateName: str
+    description: str = None  # Opcional    
     
 def enviar_otp(destinatario, otp):
     msg = EmailMessage()
