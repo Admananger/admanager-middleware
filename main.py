@@ -286,10 +286,10 @@ def cambiar_password(data: CambioPasswordRequest):
 
 @app.post("/modificar-usuario")
 def modificar_usuario(data: ModificarUsuarioPlantillaRequest):
-    # Aquí ya no se verifica OTP ni validación previa del usuario
-
+    # Reemplaza la URL para usar el endpoint ModifyUser
     modify_url = ADMANAGER_URL.replace("/SearchUser", "/ModifyUser")
 
+    # Construcción del payload
     payload = {
         "AuthToken": AUTH_TOKEN,
         "PRODUCT_NAME": "ADManager Plus",
@@ -308,21 +308,38 @@ def modificar_usuario(data: ModificarUsuarioPlantillaRequest):
 
     try:
         response = requests.post(modify_url, data=payload, headers=headers, timeout=10)
-        result = response.json()
+        response.raise_for_status()  # Lanza error si el código HTTP no es 200
 
-        if isinstance(result, list) and result[0].get("status") == "1":
+        try:
+            result = response.json()
+        except json.JSONDecodeError:
+            return JSONResponse(content={
+                "messages": [{"type": "to_user", "content": "❌ Error: respuesta inválida del servidor (no es JSON)."}],
+                "status": "error"
+            })
+
+        # Caso exitoso basado en el texto plano de la respuesta
+        if "successfully updated" in response.text.lower():
             return JSONResponse(content={
                 "messages": [{"type": "to_user", "content": f"✅ Usuario {data.sAMAccountName} modificado exitosamente con la plantilla."}],
                 "status": "ok"
             })
 
-        mensaje_error = result[0].get("statusMessage", "").lower()
+        # Si el resultado es una lista con mensaje de error
+        if isinstance(result, list):
+            mensaje_error = result[0].get("statusMessage", "Error desconocido.")
+            return JSONResponse(content={
+                "messages": [{"type": "to_user", "content": f"❌ Error al modificar usuario: {mensaje_error}"}],
+                "status": "error"
+            })
+
+        # Si no se reconoce el formato
         return JSONResponse(content={
-            "messages": [{"type": "to_user", "content": f"❌ Error al modificar usuario: {mensaje_error}"}],
+            "messages": [{"type": "to_user", "content": f"❌ Error inesperado. Respuesta del servidor: {response.text}"}],
             "status": "error"
         })
 
-    except Exception as e:
+    except requests.exceptions.RequestException as e:
         return JSONResponse(status_code=500, content={
-            "messages": [{"type": "to_user", "content": f"⚠️ Error del servidor: {str(e)}"}]
+            "messages": [{"type": "to_user", "content": f"⚠️ Error de red o servidor: {str(e)}"}]
         })
