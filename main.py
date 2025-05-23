@@ -235,11 +235,13 @@ def cambiar_password(data: CambioPasswordRequest):
     nueva_password = data.nueva_password
 
     if not usuarios_validados.get(usuario):
-        return JSONResponse(content={"messages": [{"type": "to_user", "content": "🔒 No verificado. Inicia sesión primero."}]}, status_code=403)
+        return JSONResponse(content={
+            "messages": [{"type": "to_user", "content": "🔒 No verificado. Inicia sesión primero."}]
+        }, status_code=403)
 
     if not validar_password(nueva_password):
         return JSONResponse(content={
-            "messages": [{"type": "to_user", "content": "❌ La contraseña insegura"}],
+            "messages": [{"type": "to_user", "content": "❌ La contraseña es insegura"}],
             "status": "error"
         })
 
@@ -261,7 +263,14 @@ def cambiar_password(data: CambioPasswordRequest):
         response = requests.post(reset_url, data=payload, headers=headers, timeout=10)
         result = response.json()
 
-         if isinstance(result, list) and result[0].get("status") == "1":
+        if not isinstance(result, list):
+            mensaje_error = result.get("statusMessage", "Respuesta inesperada del servidor.")
+            return JSONResponse(content={
+                "messages": [{"type": "to_user", "content": f"❌ Error: {mensaje_error}"}],
+                "status": "error"
+            })
+
+        if result[0].get("status") == "1":
             try:
                 modificar_usuario(ModificarUsuarioPlantillaRequest(sAMAccountName=usuario))
             except:
@@ -292,6 +301,7 @@ def cambiar_password(data: CambioPasswordRequest):
             "status": "error"
         }, status_code=500)
 
+# Llamado interno
 def modificar_usuario(data: ModificarUsuarioPlantillaRequest):
     modify_url = ADMANAGER_URL.replace("/SearchUser", "/ModifyUser")
 
@@ -314,4 +324,4 @@ def modificar_usuario(data: ModificarUsuarioPlantillaRequest):
         response = requests.post(modify_url, data=payload, headers=headers, timeout=10)
         response.raise_for_status()
     except:
-        pass  # Llamado silencioso, sin respuesta al usuario
+        pass  # Llamado silencioso, sin impacto en el flujo principal
