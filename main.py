@@ -37,8 +37,8 @@ class DesbloquearUsuarioRequest(BaseModel):
     usuario: str
 class ModificarUsuarioPlantillaRequest(BaseModel):
     sAMAccountName: str
-    templateName: str
-    description: str = None  # Opcional    
+    
+
     
 def enviar_otp(destinatario, otp):
     msg = EmailMessage()
@@ -261,9 +261,17 @@ def cambiar_password(data: CambioPasswordRequest):
         response = requests.post(reset_url, data=payload, headers=headers, timeout=10)
         result = response.json()
 
-        if isinstance(result, list) and result[0].get("status") == "1":
+         if isinstance(result, list) and result[0].get("status") == "1":
+            try:
+                modificar_usuario(ModificarUsuarioPlantillaRequest(sAMAccountName=usuario))
+            except:
+                pass  # Llamado silencioso
+
             return JSONResponse(content={
-                "messages": [{"type": "to_user", "content": f"✅ Contraseña actualizada correctamente para el usuario {usuario}."}],
+                "messages": [
+                    {"type": "to_user", "content": f"✅ Contraseña actualizada correctamente para el usuario {usuario}."},
+                    {"type": "to_user", "content": "🔐 Por seguridad, deberás cambiarla nuevamente al iniciar sesión."}
+                ],
                 "status": "ok"
             })
 
@@ -284,12 +292,9 @@ def cambiar_password(data: CambioPasswordRequest):
             "status": "error"
         }, status_code=500)
 
-@app.post("/modificar-usuario")
 def modificar_usuario(data: ModificarUsuarioPlantillaRequest):
-    # Reemplaza la URL para usar el endpoint ModifyUser
     modify_url = ADMANAGER_URL.replace("/SearchUser", "/ModifyUser")
 
-    # Construcción del payload
     payload = {
         "AuthToken": AUTH_TOKEN,
         "PRODUCT_NAME": "ADManager Plus",
@@ -297,7 +302,6 @@ def modificar_usuario(data: ModificarUsuarioPlantillaRequest):
         "match_ldap_name": "sAMAccountName",
         "inputFormat": json.dumps([{
             "sAMAccountName": data.sAMAccountName,
-            "description": data.description,
             "templateName": "cambioContraseñaWP"
         }])
     }
@@ -308,38 +312,6 @@ def modificar_usuario(data: ModificarUsuarioPlantillaRequest):
 
     try:
         response = requests.post(modify_url, data=payload, headers=headers, timeout=10)
-        response.raise_for_status()  # Lanza error si el código HTTP no es 200
-
-        try:
-            result = response.json()
-        except json.JSONDecodeError:
-            return JSONResponse(content={
-                "messages": [{"type": "to_user", "content": "❌ Error: respuesta inválida del servidor (no es JSON)."}],
-                "status": "error"
-            })
-
-        # Caso exitoso basado en el texto plano de la respuesta
-        if "successfully updated" in response.text.lower():
-            return JSONResponse(content={
-                "messages": [{"type": "to_user", "content": f"✅ Usuario {data.sAMAccountName} modificado exitosamente con la plantilla."}],
-                "status": "ok"
-            })
-
-        # Si el resultado es una lista con mensaje de error
-        if isinstance(result, list):
-            mensaje_error = result[0].get("statusMessage", "Error desconocido.")
-            return JSONResponse(content={
-                "messages": [{"type": "to_user", "content": f"❌ Error al modificar usuario: {mensaje_error}"}],
-                "status": "error"
-            })
-
-        # Si no se reconoce el formato
-        return JSONResponse(content={
-            "messages": [{"type": "to_user", "content": f"❌ Error inesperado. Respuesta del servidor: {response.text}"}],
-            "status": "error"
-        })
-
-    except requests.exceptions.RequestException as e:
-        return JSONResponse(status_code=500, content={
-            "messages": [{"type": "to_user", "content": f"⚠️ Error de red o servidor: {str(e)}"}]
-        })
+        response.raise_for_status()
+    except:
+        pass  # Llamado silencioso, sin respuesta al usuario
